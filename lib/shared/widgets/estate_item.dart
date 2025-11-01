@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../models/estate.dart';
 
@@ -23,11 +24,17 @@ class EstateItem extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-            child: Image.network(
-              estate.imageUrl,
+            child: CachedNetworkImage(
+              imageUrl: estate.imageUrl,
               height: 120,
               width: double.infinity,
               fit: BoxFit.cover,
+              placeholder: (context, url) => const Center(
+                child: CircularProgressIndicator(),
+              ),
+              errorWidget: (context, url, error) => const Center(
+                child: Icon(Icons.error_outline, color: Colors.red),
+              ),
             ),
           ),
           Padding(

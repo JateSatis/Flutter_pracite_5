@@ -88,18 +88,12 @@ class EstatesListScreen extends StatelessWidget {
                       content: SizedBox(
                         width: double.maxFinite,
                         child: EstateFilterForm(
-                          onSave: (title, min, max) {
+                          onSaveFilters: (title, min, max) {
                             onSetFilters(title, min, max);
                             Navigator.pop(context);
                           },
                         ),
                       ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text('Отмена'),
-                        ),
-                      ],
                     ),
                   );
                 },

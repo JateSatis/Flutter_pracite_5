@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../../shared/models/estate.dart';
 
@@ -32,11 +33,17 @@ class EstateInfoScreen extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: Image.network(
-                estate.imageUrl,
+              child: CachedNetworkImage(
+                imageUrl: estate.imageUrl,
                 height: 200,
                 width: double.infinity,
                 fit: BoxFit.cover,
+                placeholder: (context, url) => const Center(
+                  child: CircularProgressIndicator(),
+                ),
+                errorWidget: (context, url, error) => const Center(
+                  child: Icon(Icons.error_outline, color: Colors.red),
+                ),
               ),
             ),
             const SizedBox(height: 16),

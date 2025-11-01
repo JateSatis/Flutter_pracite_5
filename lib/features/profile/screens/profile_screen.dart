@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:practice_5_project/features/profile/models/profile.dart';
 import '../../../shared/models/estate.dart';
@@ -27,9 +28,19 @@ class ProfileScreen extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                CircleAvatar(
-                  radius: 40,
-                  backgroundImage: NetworkImage(profile.imageUrl),
+                ClipOval(
+                  child: CachedNetworkImage(
+                    imageUrl: profile.imageUrl,
+                    width: 80,
+                    height: 80,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                    errorWidget: (context, url, error) => const Center(
+                      child: Icon(Icons.person, size: 80),
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 16),
                 Text(

@@ -38,30 +38,22 @@ class _EstateFormScreenState extends State<EstateFormScreen> {
           key: _formKey,
           child: ListView(
             children: [
-              TextFormField(
+              TextField(
                 controller: _titleController,
                 decoration: const InputDecoration(labelText: 'Название'),
-                validator: (value) => value == null || value.isEmpty ? 'Обязательно' : null,
               ),
-              TextFormField(
+              TextField(
                 controller: _descController,
                 decoration: const InputDecoration(labelText: 'Описание'),
-                validator: (value) => value == null || value.isEmpty ? 'Обязательно' : null,
               ),
-              TextFormField(
+              TextField(
                 controller: _priceController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(labelText: 'Цена (₽/мес)'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) return 'Обязательно';
-                  if (int.tryParse(value) == null) return 'Только число';
-                  return null;
-                },
               ),
-              TextFormField(
+              TextField(
                 controller: _imageController,
                 decoration: const InputDecoration(labelText: 'Ссылка на изображение'),
-                validator: (value) => value == null || value.isEmpty ? 'Обязательно' : null,
               ),
               const SizedBox(height: 24),
               ElevatedButton(
