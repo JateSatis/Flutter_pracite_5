@@ -3,24 +3,56 @@ import '../../../shared/models/estate.dart';
 
 class EstateFormScreen extends StatefulWidget {
   final void Function(Estate) onAddEstate;
-  final VoidCallback onBack;
 
-  const EstateFormScreen({
-    super.key,
-    required this.onAddEstate,
-    required this.onBack,
-  });
+  const EstateFormScreen({super.key, required this.onAddEstate});
 
   @override
   State<EstateFormScreen> createState() => _EstateFormScreenState();
 }
 
 class _EstateFormScreenState extends State<EstateFormScreen> {
-  final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
   final _priceController = TextEditingController();
-  final _imageController = TextEditingController();
+  final _urlController = TextEditingController();
+
+  void _onBack() {
+    Navigator.pop(context);
+  }
+
+  void _onSubmit() {
+    final title = _titleController.text.trim();
+    final desc = _descController.text.trim();
+    final priceText = _priceController.text.trim();
+    final url = _urlController.text.trim();
+
+    if (title.isEmpty || desc.isEmpty || priceText.isEmpty || url.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Заполните все поля')),
+      );
+      return;
+    }
+
+    final price = int.tryParse(priceText);
+    if (price == null || price <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Цена должна быть положительным числом')),
+      );
+      return;
+    }
+
+    final newEstate = Estate(
+      id: DateTime.now().millisecondsSinceEpoch,
+      title: title,
+      description: desc,
+      price: price,
+      imageUrl: url,
+      isLiked: false,
+    );
+
+    widget.onAddEstate(newEstate);
+    Navigator.pop(context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,52 +61,41 @@ class _EstateFormScreenState extends State<EstateFormScreen> {
         title: const Text('Добавить объект'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: widget.onBack,
+          onPressed: _onBack,
         ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              TextField(
-                controller: _titleController,
-                decoration: const InputDecoration(labelText: 'Название'),
-              ),
-              TextField(
-                controller: _descController,
-                decoration: const InputDecoration(labelText: 'Описание'),
-              ),
-              TextField(
-                controller: _priceController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Цена (₽/мес)'),
-              ),
-              TextField(
-                controller: _imageController,
-                decoration: const InputDecoration(labelText: 'Ссылка на изображение'),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    final estate = Estate(
-                      id: DateTime.now().millisecondsSinceEpoch,
-                      title: _titleController.text,
-                      description: _descController.text,
-                      price: int.parse(_priceController.text),
-                      imageUrl: _imageController.text,
-                      isLiked: false,
-                    );
-                    widget.onAddEstate(estate);
-                    widget.onBack();
-                  }
-                },
-                child: const Text('Добавить'),
-              ),
-            ],
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextField(
+              controller: _titleController,
+              decoration: const InputDecoration(labelText: 'Название *'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _descController,
+              decoration: const InputDecoration(labelText: 'Описание *'),
+              maxLines: 3,
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _priceController,
+              decoration: const InputDecoration(labelText: 'Цена (₽/мес) *'),
+              keyboardType: TextInputType.number,
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _urlController,
+              decoration: const InputDecoration(labelText: 'URL изображения *'),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _onSubmit,
+              child: const Text('Сохранить'),
+            ),
+          ],
         ),
       ),
     );

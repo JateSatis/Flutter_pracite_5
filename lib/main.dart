@@ -1,11 +1,10 @@
-// lib/main.dart
 import 'package:flutter/material.dart';
 import 'shared/app_theme.dart';
 import 'shared/models/estate.dart';
 import 'features/profile/models/profile.dart';
-import 'features/estate/state/estates_container.dart';
 import 'features/profile/screens/profile_screen.dart';
 import 'features/auth/screens/login_screen.dart';
+import 'features/estate/screens/estates_list_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,55 +16,31 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Недвижимость',
       theme: AppTheme.lightTheme,
-      home: const LoginWrapper(),
+      home: const LoginScreen(),
     );
   }
 }
 
-class LoginWrapper extends StatefulWidget {
-  const LoginWrapper({super.key});
+class PageContainer extends StatefulWidget {
+  final int initialIndex;
+
+  const PageContainer({super.key, this.initialIndex = 0});
 
   @override
-  State<LoginWrapper> createState() => _LoginWrapperState();
+  State<PageContainer> createState() => _PageContainerState();
 }
 
-class _LoginWrapperState extends State<LoginWrapper> {
-  bool _isLoggedIn = false;
-
-  void _handleLogin() {
-    setState(() {
-      _isLoggedIn = true;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (!_isLoggedIn) {
-      return LoginScreen(onLogin: _handleLogin);
-    }
-
-    return HomeScreen();
-  }
-}
-
-
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
-
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  int _currentIndex = 0;
+class _PageContainerState extends State<PageContainer> {
+  late int _currentIndex;
 
   final List<Estate> _estates = [
     Estate(
       id: 1,
       title: 'Квартира у метро',
-      description: 'Современная 2-комнатная квартира в Москве, расположенная в шаговой доступности от станции метро, предлагает идеальное сочетание удобства и комфорта для городской жизни. Просторные светлые комнаты с качественным ремонтом, функциональная кухня-гостиная и продуманная планировка создают уютную атмосферу, а близость к транспорту, магазинам и парковой зоне делает проживание максимально комфортным как для семьи, так и для молодых специалистов.',
+      description: 'Современная 2-комнатная квартира в Москве...',
       price: 50000,
       imageUrl: 'https://chto-stoit-postroit.ru/wp-content/uploads/2024/04/1633791661_25-mykaleidoscope-ru-p-interer-pentkhausa-interer-krasivo-foto-25.jpg',
       isLiked: false,
@@ -93,12 +68,16 @@ class _HomeScreenState extends State<HomeScreen> {
     imageUrl: 'https://avatars.githubusercontent.com/u/77029208?v=4',
   );
 
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+  }
+
   void _toggleLike(int id) {
     final estate = _estates.firstWhere((e) => e.id == id);
-    final wasLiked = estate.isLiked;
-
     setState(() {
-      estate.isLiked = !wasLiked;
+      estate.isLiked = !estate.isLiked;
     });
   }
 
@@ -111,7 +90,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void _deleteEstate(int id) {
     final estateToDelete = _estates.firstWhere((e) => e.id == id);
     final index = _estates.indexOf(estateToDelete);
-    final wasLiked = estateToDelete.isLiked;
 
     setState(() {
       _estates.removeAt(index);
@@ -132,14 +110,28 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _navigateToRealEstate() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const PageContainer(initialIndex: 0)),
+    );
+  }
+
+  void _navigateToProfile() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const PageContainer(initialIndex: 1)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final screens = [
-      EstatesContainer(
+      EstatesListScreen(
         estates: _estates,
-        onAddEstate: _addEstate,
         onLikeEstate: _toggleLike,
         onDeleteEstate: _deleteEstate,
+        onAddEstate: _addEstate,
       ),
       ProfileScreen(
         profile: _profile,
@@ -153,7 +145,13 @@ class _HomeScreenState extends State<HomeScreen> {
       body: screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
+        onTap: (index) {
+          if (index == 0) {
+            _navigateToRealEstate();
+          } else {
+            _navigateToProfile();
+          }
+        },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Недвижимость'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Профиль'),

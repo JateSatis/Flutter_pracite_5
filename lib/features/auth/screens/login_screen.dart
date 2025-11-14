@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:practice_5_project/main.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key, required this.onLogin});
-
-  final VoidCallback onLogin;
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -13,6 +12,13 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+
+  void _handleLogin() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const PageContainer()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: widget.onLogin, // просто вызываем callback — без валидации
+                onPressed: _handleLogin,
                 child: const Text('Войти'),
               ),
             ),

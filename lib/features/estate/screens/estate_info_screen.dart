@@ -6,15 +6,17 @@ class EstateInfoScreen extends StatelessWidget {
   final Estate estate;
   final void Function(int) onLikeEstate;
   final void Function(int) onDeleteEstate;
-  final VoidCallback onBack;
 
   const EstateInfoScreen({
     super.key,
     required this.estate,
     required this.onLikeEstate,
     required this.onDeleteEstate,
-    required this.onBack,
   });
+
+  void _onBack(BuildContext context) {
+    Navigator.pop(context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +25,7 @@ class EstateInfoScreen extends StatelessWidget {
         title: const Text('Информация'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: onBack,
+          onPressed: () => _onBack(context),
         ),
       ),
       body: SingleChildScrollView(
@@ -63,7 +65,7 @@ class EstateInfoScreen extends StatelessWidget {
                   icon: const Icon(Icons.delete, color: Colors.red, size: 32),
                   onPressed: () {
                     onDeleteEstate(estate.id);
-                    onBack();
+                    Navigator.pop(context);
                   },
                 ),
                 IconButton(
