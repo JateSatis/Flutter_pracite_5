@@ -1,8 +1,8 @@
-import 'package:cached_network_image/cached_network_image.dart';
+// lib/features/profile/screens/profile_screen.dart
 import 'package:flutter/material.dart';
-import 'package:practice_5_project/features/profile/models/profile.dart';
 import '../../../shared/models/estate.dart';
 import '../../../shared/widgets/estate_item.dart';
+import '../models/profile.dart';
 
 class ProfileScreen extends StatelessWidget {
   final Profile profile;
@@ -22,24 +22,21 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Профиль')),
-      body: ListView(
+      body: likedEstates.isEmpty
+          ? const Center(child: Text('Нет избранных объектов'))
+          : ListView(
         children: [
           Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
                 ClipOval(
-                  child: CachedNetworkImage(
-                    imageUrl: profile.imageUrl,
+                  child: Image.network(
+                    profile.imageUrl,
                     width: 80,
                     height: 80,
                     fit: BoxFit.cover,
-                    placeholder: (context, url) => const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                    errorWidget: (context, url, error) => const Center(
-                      child: Icon(Icons.person, size: 80),
-                    ),
+                    errorBuilder: (_, __, ___) => const Icon(Icons.person, size: 80),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -65,11 +62,6 @@ class ProfileScreen extends StatelessWidget {
               onDeleteEstate: onDeleteEstate,
             ),
           ),
-          if (likedEstates.isEmpty)
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: Text('Нет избранных объектов'),
-            ),
         ],
       ),
     );

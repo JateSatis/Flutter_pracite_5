@@ -1,31 +1,25 @@
+// lib/features/estate/screens/estate_info_screen.dart
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../shared/models/estate.dart';
 
 class EstateInfoScreen extends StatelessWidget {
   final Estate estate;
   final void Function(int) onLikeEstate;
   final void Function(int) onDeleteEstate;
-  final VoidCallback onBack;
 
   const EstateInfoScreen({
     super.key,
     required this.estate,
     required this.onLikeEstate,
     required this.onDeleteEstate,
-    required this.onBack,
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Информация'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: onBack,
-        ),
-      ),
+      appBar: AppBar(title: const Text('Информация')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -63,7 +57,7 @@ class EstateInfoScreen extends StatelessWidget {
                   icon: const Icon(Icons.delete, color: Colors.red, size: 32),
                   onPressed: () {
                     onDeleteEstate(estate.id);
-                    onBack();
+                    if (context.canPop()) context.pop();
                   },
                 ),
                 IconButton(

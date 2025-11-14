@@ -1,18 +1,9 @@
+// lib/features/auth/screens/login_screen.dart
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key, required this.onLogin});
-
-  final VoidCallback onLogin;
-
-  @override
-  State<LoginScreen> createState() => _LoginScreenState();
-}
-
-class _LoginScreenState extends State<LoginScreen> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  bool _obscurePassword = true;
+class LoginScreen extends StatelessWidget {
+  const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +20,6 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             const SizedBox(height: 32),
             TextField(
-              controller: _emailController,
               decoration: const InputDecoration(
                 labelText: 'Email',
                 border: OutlineInputBorder(),
@@ -39,29 +29,20 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             const SizedBox(height: 16),
             TextField(
-              controller: _passwordController,
-              decoration: InputDecoration(
+              obscureText: true,
+              decoration: const InputDecoration(
                 labelText: 'Пароль',
-                border: const OutlineInputBorder(),
-                prefixIcon: const Icon(Icons.lock),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _obscurePassword = !_obscurePassword;
-                    });
-                  },
-                ),
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.lock),
               ),
-              obscureText: _obscurePassword,
             ),
             const SizedBox(height: 32),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: widget.onLogin, // просто вызываем callback — без валидации
+                onPressed: () {
+                  context.go('/');
+                },
                 child: const Text('Войти'),
               ),
             ),

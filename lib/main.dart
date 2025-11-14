@@ -1,66 +1,28 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'shared/app_theme.dart';
 import 'shared/models/estate.dart';
 import 'features/profile/models/profile.dart';
-import 'features/estate/state/estates_container.dart';
-import 'features/profile/screens/profile_screen.dart';
 import 'features/auth/screens/login_screen.dart';
+import 'features/estate/screens/estates_list_screen.dart';
+import 'features/estate/screens/estate_info_screen.dart';
+import 'features/estate/screens/estate_form_screen.dart';
+import 'features/estate/screens/estate_filter_screen.dart';
+import 'features/profile/screens/profile_screen.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const App());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class App extends StatefulWidget {
+  const App({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Недвижимость',
-      theme: AppTheme.lightTheme,
-      home: const LoginWrapper(),
-    );
-  }
+  State<App> createState() => _AppState();
 }
 
-class LoginWrapper extends StatefulWidget {
-  const LoginWrapper({super.key});
-
-  @override
-  State<LoginWrapper> createState() => _LoginWrapperState();
-}
-
-class _LoginWrapperState extends State<LoginWrapper> {
-  bool _isLoggedIn = false;
-
-  void _handleLogin() {
-    setState(() {
-      _isLoggedIn = true;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (!_isLoggedIn) {
-      return LoginScreen(onLogin: _handleLogin);
-    }
-
-    return HomeScreen();
-  }
-}
-
-
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
-
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  int _currentIndex = 0;
-
+class _AppState extends State<App> {
   final List<Estate> _estates = [
     Estate(
       id: 1,
@@ -93,25 +55,22 @@ class _HomeScreenState extends State<HomeScreen> {
     imageUrl: 'https://avatars.githubusercontent.com/u/77029208?v=4',
   );
 
-  void _toggleLike(int id) {
+  void toggleLike(int id) {
     final estate = _estates.firstWhere((e) => e.id == id);
-    final wasLiked = estate.isLiked;
-
     setState(() {
-      estate.isLiked = !wasLiked;
+      estate.isLiked = !estate.isLiked;
     });
   }
 
-  void _addEstate(Estate estate) {
+  void addEstate(Estate estate) {
     setState(() {
       _estates.add(estate);
     });
   }
 
-  void _deleteEstate(int id) {
+  void deleteEstate(int id) {
     final estateToDelete = _estates.firstWhere((e) => e.id == id);
     final index = _estates.indexOf(estateToDelete);
-    final wasLiked = estateToDelete.isLiked;
 
     setState(() {
       _estates.removeAt(index);
@@ -132,33 +91,106 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  List<Estate> get likedEstates => _estates.where((e) => e.isLiked).toList();
+
   @override
   Widget build(BuildContext context) {
-    final screens = [
-      EstatesContainer(
-        estates: _estates,
-        onAddEstate: _addEstate,
-        onLikeEstate: _toggleLike,
-        onDeleteEstate: _deleteEstate,
-      ),
-      ProfileScreen(
-        profile: _profile,
-        likedEstates: _estates.where((e) => e.isLiked).toList(),
-        onLikeEstate: _toggleLike,
-        onDeleteEstate: _deleteEstate,
-      ),
-    ];
+    final router = GoRouter(
+      initialLocation: '/login',
+      routes: [
+        GoRoute(
+          path: '/login',
+          builder: (context, state) => const LoginScreen(),
+        ),
+        GoRoute(
+          path: '/estate/add',
+          builder: (context, state) => EstateFormScreen(
+            onAddEstate: addEstate,
+          ),
+        ),
+        GoRoute(
+          path: '/estate/filters',
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>?;
+            return EstateFilterScreen(
+              initialTitle: extra?['title'] as String?,
+              initialMinPrice: extra?['minPrice'] as int?,
+              initialMaxPrice: extra?['maxPrice'] as int?,
+            );
+          },
+        ),
+        GoRoute(
+          path: '/estate/:id',
+          builder: (context, state) {
+            final idStr = state.pathParameters['id']!;
+            final id = int.parse(idStr);
+            final estate = _estates.firstWhere((e) => e.id == id);
+            return EstateInfoScreen(
+              estate: estate,
+              onLikeEstate: toggleLike,
+              onDeleteEstate: deleteEstate,
+            );
+          },
+        ),
+        ShellRoute(
+          builder: (context, state, child) {
+            int currentIndex;
+            final path = state.uri.path;
+            if (path == '/') {
+              currentIndex = 0;
+            } else if (path.startsWith('/profile')) {
+              currentIndex = 1;
+            } else {
+              currentIndex = 0;
+            }
 
-    return Scaffold(
-      body: screens[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Недвижимость'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Профиль'),
-        ],
-      ),
+            return Scaffold(
+              body: child,
+              bottomNavigationBar: BottomNavigationBar(
+                currentIndex: currentIndex,
+                onTap: (index) {
+                  if (index == 0) {
+                    context.go('/');
+                  } else {
+                    context.go('/profile');
+                  }
+                },
+                items: const [
+                  BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Недвижимость'),
+                  BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Профиль'),
+                ],
+              ),
+            );
+          },
+          routes: [
+            GoRoute(
+              path: '/',
+              builder: (context, state) => EstatesListScreen(
+                estates: _estates,
+                onLikeEstate: toggleLike,
+                onDeleteEstate: deleteEstate,
+                onAddEstate: addEstate,
+              ),
+            ),
+            GoRoute(
+              path: '/profile',
+              builder: (context, state) => ProfileScreen(
+                profile: _profile,
+                likedEstates: likedEstates,
+                onLikeEstate: toggleLike,
+                onDeleteEstate: deleteEstate,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+
+    return MaterialApp.router(
+      debugShowCheckedModeBanner: false,
+      routerConfig: router,
+      theme: AppTheme.lightTheme,
+      title: 'Недвижимость',
     );
   }
 }
