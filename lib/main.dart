@@ -1,9 +1,11 @@
+// lib/main.dart
 import 'package:flutter/material.dart';
 import 'shared/app_theme.dart';
 import 'shared/models/estate.dart';
 import 'features/profile/models/profile.dart';
 import 'features/estate/state/estates_container.dart';
 import 'features/profile/screens/profile_screen.dart';
+import 'features/auth/screens/login_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,10 +19,37 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Недвижимость',
       theme: AppTheme.lightTheme,
-      home: const HomeScreen(),
+      home: const LoginWrapper(),
     );
   }
 }
+
+class LoginWrapper extends StatefulWidget {
+  const LoginWrapper({super.key});
+
+  @override
+  State<LoginWrapper> createState() => _LoginWrapperState();
+}
+
+class _LoginWrapperState extends State<LoginWrapper> {
+  bool _isLoggedIn = false;
+
+  void _handleLogin() {
+    setState(() {
+      _isLoggedIn = true;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_isLoggedIn) {
+      return LoginScreen(onLogin: _handleLogin);
+    }
+
+    return HomeScreen();
+  }
+}
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
