@@ -2,24 +2,17 @@
 import 'package:flutter/material.dart';
 import '../../../shared/models/estate.dart';
 import '../../../shared/widgets/estate_item.dart';
-import '../models/profile.dart';
+import '../../../app_dependencies.dart';
 
 class ProfileScreen extends StatelessWidget {
-  final Profile profile;
-  final List<Estate> likedEstates;
-  final void Function(int) onLikeEstate;
-  final void Function(int) onDeleteEstate;
-
-  const ProfileScreen({
-    super.key,
-    required this.profile,
-    required this.likedEstates,
-    required this.onLikeEstate,
-    required this.onDeleteEstate,
-  });
+  const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final model = DependenciesProvider.of(context);
+    final likedEstates = model.likedEstates;
+    final profile = model.profile;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Профиль')),
       body: likedEstates.isEmpty
@@ -40,28 +33,16 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 16),
-                Text(
-                  profile.name,
-                  style: const TextStyle(fontSize: 24),
-                ),
+                Text(profile.name, style: const TextStyle(fontSize: 24)),
               ],
             ),
           ),
           const Divider(),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Text(
-              'Избранное',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
+            child: Text('Избранное', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           ),
-          ...likedEstates.map(
-                (estate) => EstateItem(
-              estate: estate,
-              onLikeEstate: onLikeEstate,
-              onDeleteEstate: onDeleteEstate,
-            ),
-          ),
+          ...likedEstates.map((estate) => EstateItem(estate: estate)),
         ],
       ),
     );

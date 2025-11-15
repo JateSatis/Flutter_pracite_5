@@ -3,59 +3,46 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../shared/models/estate.dart';
 import '../../../shared/widgets/estate_item.dart';
-import 'estate_filter_screen.dart';
+import '../../../app_dependencies.dart';
 
-class EstatesListScreen extends StatefulWidget {
-  final List<Estate> estates;
-  final void Function(int) onLikeEstate;
-  final void Function(int) onDeleteEstate;
-  final void Function(Estate) onAddEstate;
-
-  const EstatesListScreen({
-    super.key,
-    required this.estates,
-    required this.onLikeEstate,
-    required this.onDeleteEstate,
-    required this.onAddEstate,
-  });
+class EstatesListScreen extends StatelessWidget {
+  const EstatesListScreen({super.key});
 
   @override
-  State<EstatesListScreen> createState() => _EstatesListScreenState();
+  Widget build(BuildContext context) {
+    final model = DependenciesProvider.of(context);
+    final estates = model.estates;
+
+    return _EstatesListBody(estates: estates);
+  }
 }
 
-class _EstatesListScreenState extends State<EstatesListScreen> {
+class _EstatesListBody extends StatefulWidget {
+  final List<Estate> estates;
+
+  const _EstatesListBody({required this.estates});
+
+  @override
+  State<_EstatesListBody> createState() => __EstatesListBodyState();
+}
+
+class __EstatesListBodyState extends State<_EstatesListBody> {
   String? _filterTitle;
   int? _filterMinPrice;
   int? _filterMaxPrice;
 
   List<Estate> get _filteredEstates {
     return widget.estates.where((estate) {
-      if (_filterTitle != null && _filterTitle!.isNotEmpty) {
-        if (!estate.title.toLowerCase().contains(_filterTitle!.toLowerCase())) {
-          return false;
-        }
-      }
+      if (_filterTitle != null && _filterTitle!.isNotEmpty && !estate.title.toLowerCase().contains(_filterTitle!.toLowerCase())) return false;
       if (_filterMinPrice != null && estate.price < _filterMinPrice!) return false;
       if (_filterMaxPrice != null && estate.price > _filterMaxPrice!) return false;
       return true;
     }).toList();
   }
 
-  void _clearFilters() {
-    setState(() {
-      _filterTitle = null;
-      _filterMinPrice = null;
-      _filterMaxPrice = null;
-    });
-  }
-
-  void _navigateToEstateInfo(Estate estate) {
-    context.push('/estate/${estate.id}');
-  }
-
-  void _navigateToEstateForm() {
-    context.push('/estate/add');
-  }
+  void _clearFilters() => setState(() => _filterTitle = _filterMinPrice = _filterMaxPrice = null);
+  void _navigateToEstateInfo(Estate estate) => context.push('/estate/${estate.id}');
+  void _navigateToEstateForm() => context.push('/estate/add');
 
   void _navigateToFilterScreen() async {
     final result = await context.push<Map<String, dynamic>>('/estate/filters', extra: {
@@ -72,8 +59,7 @@ class _EstatesListScreenState extends State<EstatesListScreen> {
     }
   }
 
-  bool get _hasActiveFilters =>
-      _filterTitle != null || _filterMinPrice != null || _filterMaxPrice != null;
+  bool get _hasActiveFilters => _filterTitle != null || _filterMinPrice != null || _filterMaxPrice != null;
 
   @override
   Widget build(BuildContext context) {
@@ -81,21 +67,11 @@ class _EstatesListScreenState extends State<EstatesListScreen> {
       appBar: AppBar(
         title: const Text('Недвижимость'),
         actions: [
-          if (_hasActiveFilters)
-            IconButton(
-              icon: const Icon(Icons.clear, color: Colors.white),
-              onPressed: _clearFilters,
-            ),
-          IconButton(
-            icon: const Icon(Icons.filter_list),
-            onPressed: _navigateToFilterScreen,
-          ),
+          if (_hasActiveFilters) IconButton(icon: const Icon(Icons.clear, color: Colors.white), onPressed: _clearFilters),
+          IconButton(icon: const Icon(Icons.filter_list), onPressed: _navigateToFilterScreen),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _navigateToEstateForm,
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: FloatingActionButton(onPressed: _navigateToEstateForm, child: const Icon(Icons.add)),
       body: _filteredEstates.isEmpty
           ? const Center(child: Text('Нет объектов'))
           : ListView.builder(
@@ -105,11 +81,7 @@ class _EstatesListScreenState extends State<EstatesListScreen> {
           final estate = _filteredEstates[index];
           return GestureDetector(
             onTap: () => _navigateToEstateInfo(estate),
-            child: EstateItem(
-              estate: estate,
-              onLikeEstate: widget.onLikeEstate,
-              onDeleteEstate: widget.onDeleteEstate,
-            ),
+            child: EstateItem(estate: estate),
           );
         },
       ),

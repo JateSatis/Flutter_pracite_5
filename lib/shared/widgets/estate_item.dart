@@ -1,21 +1,18 @@
+// lib/shared/widgets/estate_item.dart
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../models/estate.dart';
+import '../../app_dependencies.dart';
 
 class EstateItem extends StatelessWidget {
   final Estate estate;
-  final void Function(int) onLikeEstate;
-  final void Function(int) onDeleteEstate;
 
-  const EstateItem({
-    super.key,
-    required this.estate,
-    required this.onLikeEstate,
-    required this.onDeleteEstate,
-  });
+  const EstateItem({super.key, required this.estate});
 
   @override
   Widget build(BuildContext context) {
+    final model = DependenciesProvider.of(context);
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -29,12 +26,8 @@ class EstateItem extends StatelessWidget {
               height: 120,
               width: double.infinity,
               fit: BoxFit.cover,
-              placeholder: (context, url) => const Center(
-                child: CircularProgressIndicator(),
-              ),
-              errorWidget: (context, url, error) => const Center(
-                child: Icon(Icons.error_outline, color: Colors.red),
-              ),
+              placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+              errorWidget: (context, url, error) => const Center(child: Icon(Icons.error_outline, color: Colors.red)),
             ),
           ),
           Padding(
@@ -42,10 +35,7 @@ class EstateItem extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  estate.title,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
+                Text(estate.title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 4),
                 Text('${estate.price} ₽/мес'),
               ],
@@ -58,15 +48,11 @@ class EstateItem extends StatelessWidget {
               children: [
                 IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red, size: 24),
-                  onPressed: () => onDeleteEstate(estate.id),
+                  onPressed: () => model.deleteEstate(estate.id, context),
                 ),
                 IconButton(
-                  icon: Icon(
-                    estate.isLiked ? Icons.favorite : Icons.favorite_border,
-                    color: estate.isLiked ? Colors.red : null,
-                    size: 24,
-                  ),
-                  onPressed: () => onLikeEstate(estate.id),
+                  icon: Icon(estate.isLiked ? Icons.favorite : Icons.favorite_border, color: estate.isLiked ? Colors.red : null, size: 24),
+                  onPressed: () => model.toggleLike(estate.id),
                 ),
               ],
             ),
