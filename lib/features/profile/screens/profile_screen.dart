@@ -1,25 +1,21 @@
 // lib/features/profile/screens/profile_screen.dart
 import 'package:flutter/material.dart';
+import 'package:practice_5_project/estate_repository.dart';
+import 'package:practice_5_project/profile_repository.dart';
 import '../../../shared/models/estate.dart';
 import '../../../shared/widgets/estate_item.dart';
-import '../models/profile.dart';
+import '../../../di_container.dart';
 
 class ProfileScreen extends StatelessWidget {
-  final Profile profile;
-  final List<Estate> likedEstates;
-  final void Function(int) onLikeEstate;
-  final void Function(int) onDeleteEstate;
-
-  const ProfileScreen({
-    super.key,
-    required this.profile,
-    required this.likedEstates,
-    required this.onLikeEstate,
-    required this.onDeleteEstate,
-  });
+  const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final estateRepo = getIt.get<EstateRepository>();
+    final profileRepo = getIt.get<ProfileRepository>();
+    final likedEstates = estateRepo.likedEstates;
+    final profile = profileRepo.profile;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Профиль')),
       body: likedEstates.isEmpty
@@ -56,11 +52,7 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
           ...likedEstates.map(
-                (estate) => EstateItem(
-              estate: estate,
-              onLikeEstate: onLikeEstate,
-              onDeleteEstate: onDeleteEstate,
-            ),
+                (estate) => EstateItem(estate: estate),
           ),
         ],
       ),

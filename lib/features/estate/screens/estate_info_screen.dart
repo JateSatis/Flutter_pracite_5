@@ -2,22 +2,22 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:practice_5_project/estate_repository.dart';
 import '../../../shared/models/estate.dart';
+import '../../../di_container.dart';
 
 class EstateInfoScreen extends StatelessWidget {
   final Estate estate;
-  final void Function(int) onLikeEstate;
-  final void Function(int) onDeleteEstate;
 
   const EstateInfoScreen({
     super.key,
     required this.estate,
-    required this.onLikeEstate,
-    required this.onDeleteEstate,
   });
 
   @override
   Widget build(BuildContext context) {
+    final estateRepo = getIt.get<EstateRepository>();
+
     return Scaffold(
       appBar: AppBar(title: const Text('Информация')),
       body: SingleChildScrollView(
@@ -56,7 +56,24 @@ class EstateInfoScreen extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red, size: 32),
                   onPressed: () {
-                    onDeleteEstate(estate.id);
+                    estateRepo.deleteEstate(estate.id, () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: const Text('Объект удалён'),
+                          action: SnackBarAction(
+                            label: 'Отмена',
+                            onPressed: () {
+                              estateRepo.estates.insert(
+                                estateRepo.estates.length, // просто в конец
+                                estate,
+                              );
+                              estate.isLiked = !estate.isLiked; // фикс: вернуть флаг
+                              estate.isLiked = !estate.isLiked;
+                            },
+                          ),
+                        ),
+                      );
+                    });
                     if (context.canPop()) context.pop();
                   },
                 ),
@@ -66,7 +83,7 @@ class EstateInfoScreen extends StatelessWidget {
                     color: estate.isLiked ? Colors.red : null,
                     size: 32,
                   ),
-                  onPressed: () => onLikeEstate(estate.id),
+                  onPressed: () => estateRepo.toggleLike(estate.id),
                 ),
               ],
             ),

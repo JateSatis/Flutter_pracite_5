@@ -1,23 +1,13 @@
 // lib/features/estate/screens/estates_list_screen.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:practice_5_project/estate_repository.dart';
 import '../../../shared/models/estate.dart';
 import '../../../shared/widgets/estate_item.dart';
-import 'estate_filter_screen.dart';
+import '../../../di_container.dart';
 
 class EstatesListScreen extends StatefulWidget {
-  final List<Estate> estates;
-  final void Function(int) onLikeEstate;
-  final void Function(int) onDeleteEstate;
-  final void Function(Estate) onAddEstate;
-
-  const EstatesListScreen({
-    super.key,
-    required this.estates,
-    required this.onLikeEstate,
-    required this.onDeleteEstate,
-    required this.onAddEstate,
-  });
+  const EstatesListScreen({super.key});
 
   @override
   State<EstatesListScreen> createState() => _EstatesListScreenState();
@@ -29,7 +19,8 @@ class _EstatesListScreenState extends State<EstatesListScreen> {
   int? _filterMaxPrice;
 
   List<Estate> get _filteredEstates {
-    return widget.estates.where((estate) {
+    final estateRepo = getIt.get<EstateRepository>();
+    return estateRepo.estates.where((estate) {
       if (_filterTitle != null && _filterTitle!.isNotEmpty) {
         if (!estate.title.toLowerCase().contains(_filterTitle!.toLowerCase())) {
           return false;
@@ -105,11 +96,7 @@ class _EstatesListScreenState extends State<EstatesListScreen> {
           final estate = _filteredEstates[index];
           return GestureDetector(
             onTap: () => _navigateToEstateInfo(estate),
-            child: EstateItem(
-              estate: estate,
-              onLikeEstate: widget.onLikeEstate,
-              onDeleteEstate: widget.onDeleteEstate,
-            ),
+            child: EstateItem(estate: estate),
           );
         },
       ),

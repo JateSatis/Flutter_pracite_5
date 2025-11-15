@@ -1,12 +1,12 @@
 // lib/features/estate/screens/estate_form_screen.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:practice_5_project/estate_repository.dart';
 import '../../../shared/models/estate.dart';
+import '../../../di_container.dart';
 
 class EstateFormScreen extends StatefulWidget {
-  final void Function(Estate) onAddEstate;
-
-  const EstateFormScreen({super.key, required this.onAddEstate});
+  const EstateFormScreen({super.key});
 
   @override
   State<EstateFormScreen> createState() => _EstateFormScreenState();
@@ -48,7 +48,8 @@ class _EstateFormScreenState extends State<EstateFormScreen> {
       isLiked: false,
     );
 
-    widget.onAddEstate(newEstate);
+    final estateRepo = getIt.get<EstateRepository>();
+    estateRepo.addEstate(newEstate);
     if (context.canPop()) context.pop();
   }
 
