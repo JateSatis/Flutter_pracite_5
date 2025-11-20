@@ -1,9 +1,9 @@
 // lib/features/estate/screens/estate_form_screen.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:practice_5_project/estate_repository.dart';
+import 'package:practice_5_project/shared/cubits/estate_cubit.dart';
 import '../../../shared/models/estate.dart';
-import '../../../di_container.dart';
 
 class EstateFormScreen extends StatefulWidget {
   const EstateFormScreen({super.key});
@@ -48,8 +48,7 @@ class _EstateFormScreenState extends State<EstateFormScreen> {
       isLiked: false,
     );
 
-    final estateRepo = getIt.get<EstateRepository>();
-    estateRepo.addEstate(newEstate);
+    context.read<EstateCubit>().addEstate(newEstate);
     if (context.canPop()) context.pop();
   }
 

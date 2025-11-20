@@ -1,10 +1,10 @@
 // lib/features/estate/screens/estate_info_screen.dart
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:practice_5_project/estate_repository.dart';
+import 'package:practice_5_project/shared/cubits/estate_cubit.dart';
 import '../../../shared/models/estate.dart';
-import '../../../di_container.dart';
 
 class EstateInfoScreen extends StatelessWidget {
   final Estate estate;
@@ -16,8 +16,6 @@ class EstateInfoScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final estateRepo = getIt.get<EstateRepository>();
-
     return Scaffold(
       appBar: AppBar(title: const Text('Информация')),
       body: SingleChildScrollView(
@@ -56,24 +54,10 @@ class EstateInfoScreen extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red, size: 32),
                   onPressed: () {
-                    estateRepo.deleteEstate(estate.id, () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: const Text('Объект удалён'),
-                          action: SnackBarAction(
-                            label: 'Отмена',
-                            onPressed: () {
-                              estateRepo.estates.insert(
-                                estateRepo.estates.length, // просто в конец
-                                estate,
-                              );
-                              estate.isLiked = !estate.isLiked; // фикс: вернуть флаг
-                              estate.isLiked = !estate.isLiked;
-                            },
-                          ),
-                        ),
-                      );
-                    });
+                    context.read<EstateCubit>().deleteEstate(estate.id);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Объект удалён')),
+                    );
                     if (context.canPop()) context.pop();
                   },
                 ),
@@ -83,7 +67,7 @@ class EstateInfoScreen extends StatelessWidget {
                     color: estate.isLiked ? Colors.red : null,
                     size: 32,
                   ),
-                  onPressed: () => estateRepo.toggleLike(estate.id),
+                  onPressed: () => context.read<EstateCubit>().toggleLike(estate.id),
                 ),
               ],
             ),

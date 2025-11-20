@@ -1,10 +1,10 @@
 // lib/features/estate/screens/estates_list_screen.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:practice_5_project/estate_repository.dart';
+import 'package:practice_5_project/shared/cubits/estate_cubit.dart';
 import '../../../shared/models/estate.dart';
 import '../../../shared/widgets/estate_item.dart';
-import '../../../di_container.dart';
 
 class EstatesListScreen extends StatefulWidget {
   const EstatesListScreen({super.key});
@@ -18,9 +18,8 @@ class _EstatesListScreenState extends State<EstatesListScreen> {
   int? _filterMinPrice;
   int? _filterMaxPrice;
 
-  List<Estate> get _filteredEstates {
-    final estateRepo = getIt.get<EstateRepository>();
-    return estateRepo.estates.where((estate) {
+  List<Estate> _filterEstates(List<Estate> estates) {
+    return estates.where((estate) {
       if (_filterTitle != null && _filterTitle!.isNotEmpty) {
         if (!estate.title.toLowerCase().contains(_filterTitle!.toLowerCase())) {
           return false;
@@ -87,16 +86,21 @@ class _EstatesListScreenState extends State<EstatesListScreen> {
         onPressed: _navigateToEstateForm,
         child: const Icon(Icons.add),
       ),
-      body: _filteredEstates.isEmpty
-          ? const Center(child: Text('Нет объектов'))
-          : ListView.builder(
-        padding: const EdgeInsets.only(top: 8),
-        itemCount: _filteredEstates.length,
-        itemBuilder: (context, index) {
-          final estate = _filteredEstates[index];
-          return GestureDetector(
-            onTap: () => _navigateToEstateInfo(estate),
-            child: EstateItem(estate: estate),
+      body: BlocBuilder<EstateCubit, List<Estate>>(
+        builder: (context, estates) {
+          final filtered = _filterEstates(estates);
+          return filtered.isEmpty
+              ? const Center(child: Text('Нет объектов'))
+              : ListView.builder(
+            padding: const EdgeInsets.only(top: 8),
+            itemCount: filtered.length,
+            itemBuilder: (context, index) {
+              final estate = filtered[index];
+              return GestureDetector(
+                onTap: () => _navigateToEstateInfo(estate),
+                child: EstateItem(estate: estate),
+              );
+            },
           );
         },
       ),

@@ -1,8 +1,10 @@
-// lib/repositories/estate_repository.dart
-import '../shared/models/estate.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../shared/models/estate.dart';
 
-class EstateRepository {
-  final List<Estate> _estates = [
+class EstateCubit extends Cubit<List<Estate>> {
+  EstateCubit() : super(_initialEstates);
+
+  static final List<Estate> _initialEstates = [
     Estate(
       id: 1,
       title: 'Квартира у метро',
@@ -29,24 +31,24 @@ class EstateRepository {
     ),
   ];
 
-  List<Estate> get estates => _estates;
-  List<Estate> get likedEstates => _estates.where((e) => e.isLiked).toList();
+  List<Estate> get estates => state;
+  List<Estate> get likedEstates => state.where((e) => e.isLiked).toList();
 
   void toggleLike(int id) {
-    final estate = _estates.firstWhere((e) => e.id == id);
-    estate.isLiked = !estate.isLiked;
+    final estates = List<Estate>.from(state);
+    final index = estates.indexWhere((e) => e.id == id);
+    if (index != -1) {
+      estates[index] = estates[index].copyWith(isLiked: !estates[index].isLiked);
+      emit(estates);
+    }
   }
 
   void addEstate(Estate estate) {
-    _estates.add(estate);
+    emit([...state, estate]);
   }
 
-  void deleteEstate(int id, void Function() showSnackBar) {
-    final estateToDelete = _estates.firstWhere((e) => e.id == id);
-    final index = _estates.indexOf(estateToDelete);
-    _estates.removeAt(index);
-
-    // Передаём функцию showSnackBar извне (из BuildContext), т.к. здесь нет доступа к Scaffold
-    showSnackBar();
+  void deleteEstate(int id) {
+    emit(state.where((e) => e.id != id).toList());
   }
 }
+

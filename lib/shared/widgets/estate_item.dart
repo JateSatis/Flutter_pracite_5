@@ -1,9 +1,9 @@
 // lib/shared/widgets/estate_item.dart
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:practice_5_project/estate_repository.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:practice_5_project/shared/cubits/estate_cubit.dart';
 import '../models/estate.dart';
-import '../../di_container.dart';
 
 class EstateItem extends StatelessWidget {
   final Estate estate;
@@ -15,8 +15,6 @@ class EstateItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final estateRepo = getIt.get<EstateRepository>();
-
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -60,24 +58,10 @@ class EstateItem extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red, size: 24),
                   onPressed: () {
-                    estateRepo.deleteEstate(estate.id, () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: const Text('Объект удалён'),
-                          action: SnackBarAction(
-                            label: 'Отмена',
-                            onPressed: () {
-                              estateRepo.estates.insert(
-                                estateRepo.estates.length,
-                                estate,
-                              );
-                              estate.isLiked = !estate.isLiked;
-                              estate.isLiked = !estate.isLiked;
-                            },
-                          ),
-                        ),
-                      );
-                    });
+                    context.read<EstateCubit>().deleteEstate(estate.id);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Объект удалён')),
+                    );
                   },
                 ),
                 IconButton(
@@ -86,7 +70,7 @@ class EstateItem extends StatelessWidget {
                     color: estate.isLiked ? Colors.red : null,
                     size: 24,
                   ),
-                  onPressed: () => estateRepo.toggleLike(estate.id),
+                  onPressed: () => context.read<EstateCubit>().toggleLike(estate.id),
                 ),
               ],
             ),
