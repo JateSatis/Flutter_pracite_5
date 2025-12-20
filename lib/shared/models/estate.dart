@@ -5,6 +5,11 @@ class Estate {
   final int price;
   final String imageUrl;
   bool isLiked;
+  final double latitude;
+  final double longitude;
+  final int ownerId;
+  int totalStars;
+  int reviewsAmount;
 
   Estate({
     required this.id,
@@ -13,7 +18,14 @@ class Estate {
     required this.price,
     required this.imageUrl,
     required this.isLiked,
+    required this.latitude,
+    required this.longitude,
+    required this.ownerId,
+    this.totalStars = 0,
+    this.reviewsAmount = 0,
   });
+
+  double get averageRating => reviewsAmount > 0 ? totalStars / reviewsAmount : 0.0;
 
   Estate copyWith({
     int? id,
@@ -22,6 +34,11 @@ class Estate {
     int? price,
     String? imageUrl,
     bool? isLiked,
+    double? latitude,
+    double? longitude,
+    int? ownerId,
+    int? totalStars,
+    int? reviewsAmount,
   }) {
     return Estate(
       id: id ?? this.id,
@@ -30,6 +47,11 @@ class Estate {
       price: price ?? this.price,
       imageUrl: imageUrl ?? this.imageUrl,
       isLiked: isLiked ?? this.isLiked,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      ownerId: ownerId ?? this.ownerId,
+      totalStars: totalStars ?? this.totalStars,
+      reviewsAmount: reviewsAmount ?? this.reviewsAmount,
     );
   }
 }

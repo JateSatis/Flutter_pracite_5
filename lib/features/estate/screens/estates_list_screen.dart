@@ -17,6 +17,7 @@ class _EstatesListScreenState extends State<EstatesListScreen> {
   String? _filterTitle;
   int? _filterMinPrice;
   int? _filterMaxPrice;
+  double? _filterMinRating;
 
   List<Estate> _filterEstates(List<Estate> estates) {
     return estates.where((estate) {
@@ -27,6 +28,12 @@ class _EstatesListScreenState extends State<EstatesListScreen> {
       }
       if (_filterMinPrice != null && estate.price < _filterMinPrice!) return false;
       if (_filterMaxPrice != null && estate.price > _filterMaxPrice!) return false;
+      if (_filterMinRating != null) {
+        final rating = estate.reviewsAmount > 0
+            ? estate.totalStars / estate.reviewsAmount
+            : 0.0;
+        if (rating < _filterMinRating!) return false;
+      }
       return true;
     }).toList();
   }
@@ -36,6 +43,7 @@ class _EstatesListScreenState extends State<EstatesListScreen> {
       _filterTitle = null;
       _filterMinPrice = null;
       _filterMaxPrice = null;
+      _filterMinRating = null;
     });
   }
 
@@ -52,18 +60,23 @@ class _EstatesListScreenState extends State<EstatesListScreen> {
       'title': _filterTitle,
       'minPrice': _filterMinPrice,
       'maxPrice': _filterMaxPrice,
+      'minRating': _filterMinRating,
     });
     if (result != null) {
       setState(() {
         _filterTitle = result['title'] as String?;
         _filterMinPrice = result['minPrice'] as int?;
         _filterMaxPrice = result['maxPrice'] as int?;
+        _filterMinRating = result['minRating'] as double?;
       });
     }
   }
 
   bool get _hasActiveFilters =>
-      _filterTitle != null || _filterMinPrice != null || _filterMaxPrice != null;
+      _filterTitle != null ||
+      _filterMinPrice != null ||
+      _filterMaxPrice != null ||
+      _filterMinRating != null;
 
   @override
   Widget build(BuildContext context) {
@@ -81,10 +94,6 @@ class _EstatesListScreenState extends State<EstatesListScreen> {
             onPressed: _navigateToFilterScreen,
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _navigateToEstateForm,
-        child: const Icon(Icons.add),
       ),
       body: BlocBuilder<EstateCubit, List<Estate>>(
         builder: (context, estates) {

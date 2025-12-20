@@ -6,12 +6,14 @@ class EstateFilterScreen extends StatefulWidget {
   final String? initialTitle;
   final int? initialMinPrice;
   final int? initialMaxPrice;
+  final double? initialMinRating;
 
   const EstateFilterScreen({
     super.key,
     this.initialTitle,
     this.initialMinPrice,
     this.initialMaxPrice,
+    this.initialMinRating,
   });
 
   @override
@@ -23,6 +25,8 @@ class _EstateFilterScreenState extends State<EstateFilterScreen> {
   late final TextEditingController _titleController;
   late final TextEditingController _minPriceController;
   late final TextEditingController _maxPriceController;
+  late final TextEditingController _minRatingController;
+  int _selectedRating = 0;
 
   @override
   void initState() {
@@ -30,6 +34,10 @@ class _EstateFilterScreenState extends State<EstateFilterScreen> {
     _titleController = TextEditingController(text: widget.initialTitle ?? '');
     _minPriceController = TextEditingController(text: widget.initialMinPrice?.toString() ?? '');
     _maxPriceController = TextEditingController(text: widget.initialMaxPrice?.toString() ?? '');
+    _minRatingController = TextEditingController(
+      text: widget.initialMinRating?.toString() ?? '',
+    );
+    _selectedRating = widget.initialMinRating?.round() ?? 0;
   }
 
   @override
@@ -37,6 +45,7 @@ class _EstateFilterScreenState extends State<EstateFilterScreen> {
     _titleController.dispose();
     _minPriceController.dispose();
     _maxPriceController.dispose();
+    _minRatingController.dispose();
     super.dispose();
   }
 
@@ -51,11 +60,13 @@ class _EstateFilterScreenState extends State<EstateFilterScreen> {
       final max = _maxPriceController.text.trim().isNotEmpty
           ? int.tryParse(_maxPriceController.text.trim())
           : null;
+      final minRating = _selectedRating > 0 ? _selectedRating.toDouble() : null;
 
       context.pop({
         'title': title,
         'minPrice': min,
         'maxPrice': max,
+        'minRating': minRating,
       });
     }
   }
@@ -64,6 +75,9 @@ class _EstateFilterScreenState extends State<EstateFilterScreen> {
     _titleController.clear();
     _minPriceController.clear();
     _maxPriceController.clear();
+    _minRatingController.clear();
+    _selectedRating = 0;
+    setState(() {});
     _formKey.currentState!.reset();
   }
 
@@ -113,6 +127,26 @@ class _EstateFilterScreenState extends State<EstateFilterScreen> {
                   if (num == null) return 'Введите число';
                   return null;
                 },
+              ),
+              const SizedBox(height: 16),
+              const Text('Минимальная оценка'),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(5, (index) {
+                  return IconButton(
+                    icon: Icon(
+                      index < _selectedRating ? Icons.star : Icons.star_border,
+                      color: Colors.amber,
+                      size: 32,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _selectedRating = index + 1;
+                      });
+                    },
+                  );
+                }),
               ),
               const SizedBox(height: 32),
               ElevatedButton(

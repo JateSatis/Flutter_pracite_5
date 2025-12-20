@@ -1,7 +1,9 @@
 // lib/features/profile/screens/profile_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:practice_5_project/shared/cubits/estate_cubit.dart';
+import 'package:practice_5_project/shared/cubits/auth_cubit.dart';
 import 'package:practice_5_project/features/profile/cubits/profile_cubit.dart';
 import '../../../shared/models/estate.dart';
 import '../../../shared/widgets/estate_item.dart';
@@ -20,9 +22,7 @@ class ProfileScreen extends StatelessWidget {
 
           return Scaffold(
             appBar: AppBar(title: const Text('Профиль')),
-            body: likedEstates.isEmpty
-                ? const Center(child: Text('Нет избранных объектов'))
-                : ListView(
+            body: ListView(
               children: [
                 Padding(
                   padding: const EdgeInsets.all(16),
@@ -38,12 +38,21 @@ class ProfileScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 16),
-                      Text(
-                        profile.name,
-                        style: const TextStyle(fontSize: 24),
+                      Expanded(
+                        child: Text(
+                          profile.name,
+                          style: const TextStyle(fontSize: 24),
+                        ),
                       ),
                     ],
                   ),
+                ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.home_work),
+                  title: const Text('Мои объявления'),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: () => context.push('/my-estates'),
                 ),
                 const Divider(),
                 const Padding(
@@ -53,7 +62,35 @@ class ProfileScreen extends StatelessWidget {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
-                ...likedEstates.map((estate) => EstateItem(estate: estate)),
+                if (likedEstates.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.all(32),
+                    child: Center(
+                      child: Text(
+                        'Нет избранных объектов',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                  )
+                else
+                  ...likedEstates.map((estate) => EstateItem(estate: estate)),
+                const Divider(),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      context.read<AuthCubit>().logout();
+                      context.go('/login');
+                    },
+                    icon: const Icon(Icons.exit_to_app),
+                    label: const Text('Выйти из аккаунта'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
               ],
             ),
           );

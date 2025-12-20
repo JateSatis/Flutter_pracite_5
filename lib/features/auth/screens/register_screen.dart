@@ -1,43 +1,49 @@
-// lib/features/auth/screens/login_screen.dart
+// lib/features/auth/screens/register_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:practice_5_project/shared/cubits/auth_cubit.dart';
 import 'package:practice_5_project/shared/models/user.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _avatarController = TextEditingController();
 
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _avatarController.dispose();
     super.dispose();
   }
 
-  void _onLogin() {
+  void _onRegister() {
     if (_formKey.currentState!.validate()) {
-      // Простая мокапная авторизация
+      final name = _nameController.text.trim();
       final email = _emailController.text.trim();
-      
-      // Для демонстрации создаем пользователя или используем существующего
-      final user = User(
-        id: 1,
-        name: 'Максим Данилов',
+      final avatarUrl = _avatarController.text.trim().isNotEmpty
+          ? _avatarController.text.trim()
+          : 'https://i.pravatar.cc/150';
+
+      final newUser = User(
+        id: DateTime.now().millisecondsSinceEpoch,
+        name: name,
         email: email,
-        avatarUrl: 'https://avatars.githubusercontent.com/u/77029208?v=4',
+        avatarUrl: avatarUrl,
       );
 
-      context.read<AuthCubit>().login(user);
+      context.read<AuthCubit>().login(newUser);
       context.go('/');
     }
   }
@@ -45,7 +51,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Вход')),
+      appBar: AppBar(title: const Text('Регистрация')),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
         child: Form(
@@ -54,10 +60,25 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Text(
-                'Войдите в аккаунт',
+                'Создайте аккаунт',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 32),
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Имя',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.person),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Введите имя';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _emailController,
                 decoration: const InputDecoration(
@@ -89,18 +110,27 @@ class _LoginScreenState extends State<LoginScreen> {
                   return null;
                 },
               ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _avatarController,
+                decoration: const InputDecoration(
+                  labelText: 'URL аватара (необязательно)',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.image),
+                ),
+              ),
               const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _onLogin,
-                  child: const Text('Войти'),
+                  onPressed: _onRegister,
+                  child: const Text('Зарегистрироваться'),
                 ),
               ),
               const SizedBox(height: 16),
               TextButton(
-                onPressed: () => context.go('/register'),
-                child: const Text('Нет аккаунта? Зарегистрироваться'),
+                onPressed: () => context.go('/login'),
+                child: const Text('Уже есть аккаунт? Войти'),
               ),
             ],
           ),
@@ -109,3 +139,4 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
+
